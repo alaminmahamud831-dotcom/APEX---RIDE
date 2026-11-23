@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#071321" />
+  <meta name="description" content="ALAMIN APEX RIDE — a mobile-first 3D motorcycle traffic racing game." />
+  <title>ALAMIN APEX RIDE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./src/game.css" />
+  <script type="importmap">
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js"}}
+  </script>
+</head>
+<body>
+  <main id="app">
+    <div id="stage" aria-label="3D motorcycle game"></div>
+
+    <header class="hud top-hud">
+      <button class="identity" id="openProfile" aria-label="Open player profile">
+        <img src="./assets/images/alamin-portrait.jpg" alt="Alamin" />
+        <span class="identity-copy"><b>ALAMIN</b><small>APEX <i>RIDE</i></small></span>
+      </button>
+      <div class="stat speed-stat"><strong id="speedValue">0</strong><small>KM/H</small></div>
+      <div class="stat score-stat"><strong id="scoreValue">0000</strong><small>RIDE SCORE</small></div>
+      <div class="stat coin-stat"><span class="coin-mark">◆</span><strong id="coinValue">000</strong><small>COINS</small></div>
+      <button class="icon-button pause-button" id="pauseButton" aria-label="Pause game">Ⅱ</button>
+    </header>
+
+    <section class="hud ride-label">
+      <div class="ride-name"><small>PLAYER ONE</small><b>ALAMIN R-15 APEX</b><span id="routeName">RIYADH RING ROAD</span></div>
+      <div class="gear-pill"><span id="gearValue">D</span><small>AUTO</small></div>
+    </section>
+
+    <section class="hud game-controls" id="gameControls">
+      <div class="steer-group" id="arrowControls" aria-label="Steering controls">
+        <button class="control-button steer-button" id="leftButton" aria-label="Steer left"><span>‹</span></button>
+        <button class="control-button steer-button" id="rightButton" aria-label="Steer right"><span>›</span></button>
+      </div>
+      <div class="steer-wheel-wrap hidden" id="wheelControls">
+        <span class="wheel-caption">STEERING WHEEL · DRAG</span>
+        <div class="wheel-pad" id="wheelPad" aria-label="Drag steering wheel">
+          <div class="wheel-ring"><i class="spoke spoke-v"></i><i class="spoke spoke-left"></i><i class="spoke spoke-right"></i><b> A </b></div>
+        </div>
+        <input type="range" min="-100" max="100" value="0" id="steeringRange" aria-label="Steering input" />
+      </div>
+      <div class="tilt-hint hidden" id="tiltHint">TILT YOUR PHONE TO STEER</div>
+      <div class="drive-group">
+        <button class="control-button brake-button" id="brakeButton"><span>BRAKE</span></button>
+        <button class="control-button nitro-button" id="nitroButton"><span class="nitro-flame">✦</span><span>NITRO</span></button>
+      </div>
+    </section>
+
+    <div class="hud speed-arc" id="speedArc"><div class="arc-ring"><span id="arcSpeed">0</span><small>KM/H</small></div></div>
+
+    <section class="modal active" id="mainMenu">
+      <div class="menu-card">
+        <div class="menu-topline"><span>OPEN ROAD SERIES</span><span class="season">SEASON 01</span></div>
+        <div class="menu-hero">
+          <div class="menu-brand"><div class="brand-mark">A</div><div><h1>ALAMIN <em>APEX</em></h1><p>RIDE BEYOND LIMITS</p></div></div>
+          <div class="menu-photo"><img src="./assets/images/alamin-bike-photo.jpg" alt="Alamin on his blue sport motorcycle" /></div>
+        </div>
+        <div class="menu-subtitle"><span>YOUR ROAD.</span><b>YOUR LEGEND.</b></div>
+        <button class="primary-button" id="startButton"><span>START RIDE</span><b>›</b></button>
+        <div class="menu-actions">
+          <button class="secondary-button" data-open="garage">GARAGE</button>
+          <button class="secondary-button" data-open="profile">PROFILE</button>
+          <button class="secondary-button" data-open="settings">SETTINGS</button>
+        </div>
+        <div class="menu-footer"><span>ALAMIN R-15 APEX</span><span>3D HIGHWAY EXPERIENCE</span></div>
+      </div>
+    </section>
+
+    <section class="modal" id="pauseMenu">
+      <div class="small-modal-card">
+        <span class="eyebrow">RIDE PAUSED</span><h2>TAKE A BREATHER</h2>
+        <button class="primary-button" id="resumeButton">RESUME RIDE <b>›</b></button>
+        <button class="secondary-button wide" id="restartButton">RESTART RIDE</button>
+        <button class="secondary-button wide" id="pauseHomeButton">MAIN MENU</button>
+      </div>
+    </section>
+
+    <section class="modal" id="gameOverMenu">
+      <div class="small-modal-card">
+        <span class="eyebrow danger">RIDE ENDED</span><h2>WIPEOUT</h2>
+        <div class="result-grid"><div><small>RIDE SCORE</small><b id="finalScore">0</b></div><div><small>COINS EARNED</small><b id="finalCoins">0</b></div></div>
+        <button class="primary-button" id="againButton">RIDE AGAIN <b>↻</b></button>
+        <button class="secondary-button wide" id="gameOverHomeButton">MAIN MENU</button>
+      </div>
+    </section>
+
+    <section class="modal" id="garageMenu">
+      <div class="panel-card">
+        <div class="panel-head"><div><span class="eyebrow">YOUR MACHINE</span><h2>THE GARAGE</h2></div><button class="close-button" data-close>✕</button></div>
+        <div class="garage-bike-view"><div class="garage-grid"></div><div class="garage-bike-caption"><b>ALAMIN R-15 APEX</b><span>BLUE / CARBON BLACK SIGNATURE EDITION</span></div></div>
+        <div class="custom-row"><div><b>FAIRING COLOUR</b><small>Choose your signature finish</small></div><div class="swatches"><button class="swatch active" data-paint="blue" aria-label="Blue"></button><button class="swatch red" data-paint="red" aria-label="Red"></button><button class="swatch pearl" data-paint="pearl" aria-label="Pearl white"></button><button class="swatch cyan" data-paint="cyan" aria-label="Cyan"></button></div></div>
+        <div class="bike-specs"><div><small>TOP SPEED</small><b>235 <i>KM/H</i></b></div><div><small>ACCELERATION</small><b>92 <i>/100</i></b></div><div><small>HANDLING</small><b>94 <i>/100</i></b></div></div>
+        <button class="primary-button" id="garageRideButton">RIDE THIS BIKE <b>›</b></button>
+        <p class="fineprint">Custom model inspired by your blue-and-black sport-bike reference.</p>
+      </div>
+    </section>
+
+    <section class="modal" id="profileMenu">
+      <div class="panel-card profile-card">
+        <div class="panel-head"><div><span class="eyebrow">RIDER ID</span><h2>PLAYER PROFILE</h2></div><button class="close-button" data-close>✕</button></div>
+        <div class="profile-hero"><img src="./assets/images/alamin-portrait.jpg" alt="Alamin profile"/><div><span class="eyebrow">RIDER / 001</span><h2>ALAMIN</h2><p>APEX ROAD SERIES</p><span class="level-pill">LEVEL 01 · ROOKIE</span></div></div>
+        <div class="profile-stats"><div><b id="profileBest">0</b><small>BEST SCORE</small></div><div><b id="profileCoins">0</b><small>TOTAL COINS</small></div><div><b id="profileDistance">0.0</b><small>KM RIDDEN</small></div></div>
+        <div class="profile-reference"><img src="./assets/images/alamin-character-bike-reference.jpg" alt="Alamin character and bike reference"/><span>ALAMIN CHARACTER & BIKE IDENTITY</span></div>
+        <button class="secondary-button wide" data-close>BACK TO RIDE</button>
+      </div>
+    </section>
+
+    <section class="modal" id="settingsMenu">
+      <div class="small-modal-card settings-card">
+        <div class="panel-head"><div><span class="eyebrow">PREFERENCES</span><h2>SETTINGS</h2></div><button class="close-button" data-close>✕</button></div>
+        <label class="setting-label">STEERING STYLE</label>
+        <div class="mode-options"><button class="mode-option active" data-mode="arrows"><b>‹ ›</b><small>ARROWS</small></button><button class="mode-option" data-mode="wheel"><b>◉</b><small>STEERING</small></button><button class="mode-option" data-mode="tilt"><b>▱</b><small>TILT</small></button></div>
+        <label class="setting-label" for="qualitySelect">GRAPHICS QUALITY</label><select id="qualitySelect" class="select-control"><option value="auto">AUTO (RECOMMENDED)</option><option value="high">HIGH</option><option value="medium">MEDIUM</option><option value="low">LOW / BATTERY SAVE</option></select>
+        <label class="setting-label" for="soundToggle">GAME AUDIO</label><div class="toggle-row"><span>Engine & effects</span><input type="checkbox" id="soundToggle" checked /></div>
+        <div class="setting-note" id="tiltPermissionNote">Tilt steering may require motion-sensor permission on your phone.</div>
+        <button class="primary-button" data-close>DONE <b>✓</b></button>
+      </div>
+    </section>
+
+    <div id="toast" class="toast" role="status"></div>
+    <div id="loading" class="loading-screen"><div class="loading-brand"><span>A</span><b>ALAMIN <i>APEX RIDE</i></b></div><div class="loading-line"><i></i></div><small>PREPARING THE ROAD</small></div>
+  </main>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
